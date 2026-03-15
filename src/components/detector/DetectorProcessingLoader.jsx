@@ -189,13 +189,12 @@ function DetectorProcessingLoader({ headline, onComplete }) {
               return (
                 <div
                   key={step.id}
-                  className={`group relative flex items-start gap-3 rounded-xl px-4 py-2.5 transition-all duration-300 ${
-                    isActive
+                  className={`group relative flex items-start gap-3 rounded-xl px-4 py-2.5 transition-all duration-300 ${isActive
                       ? 'bg-slate-800/30'
                       : isDone
-                      ? 'bg-slate-800/15'
-                      : ''
-                  }`}
+                        ? 'bg-slate-800/15'
+                        : ''
+                    }`}
                 >
                   {/* Active left accent */}
                   {isActive && (
@@ -225,13 +224,12 @@ function DetectorProcessingLoader({ headline, onComplete }) {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between">
                       <span
-                        className={`text-sm font-medium transition-colors duration-200 ${
-                          isDone
+                        className={`text-sm font-medium transition-colors duration-200 ${isDone
                             ? 'text-emerald-400/80'
                             : isActive
-                            ? 'text-white'
-                            : 'text-slate-600'
-                        }`}
+                              ? 'text-white'
+                              : 'text-slate-600'
+                          }`}
                       >
                         {step.label}
                       </span>
@@ -247,13 +245,12 @@ function DetectorProcessingLoader({ headline, onComplete }) {
                       )}
                     </div>
                     <p
-                      className={`text-xs mt-0.5 font-mono ${
-                        isDone
+                      className={`text-xs mt-0.5 font-mono ${isDone
                           ? 'text-slate-600'
                           : isActive
-                          ? 'text-slate-400'
-                          : 'text-slate-700'
-                      }`}
+                            ? 'text-slate-400'
+                            : 'text-slate-700'
+                        }`}
                     >
                       {isDone ? step.doneDesc : step.desc}
                     </p>

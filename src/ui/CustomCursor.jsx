@@ -2,24 +2,24 @@ import React, { useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
 
 export default function CustomCursor({ children }) {
-  const outerRef     = useRef(null);
+  const outerRef = useRef(null);
   const innerVeloRef = useRef(null);
-  const dotRef       = useRef(null);
+  const dotRef = useRef(null);
 
   // Tracks whether the ticker should skip the default velocity-stretch
   const isHovering = useRef(false);
 
   // Smooth cursor position (lerped each frame)
-  const mouse   = useRef({ x: 0, y: 0 });
+  const mouse = useRef({ x: 0, y: 0 });
   const delayed = useRef({ x: 0, y: 0 });
 
   // ─── EFFECT 1: Core Movement, Ticker & Velocity Stretch ───────────────────
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    const cx = window.innerWidth  / 2;
+    const cx = window.innerWidth / 2;
     const cy = window.innerHeight / 2;
-    mouse.current   = { x: cx, y: cy };
+    mouse.current = { x: cx, y: cy };
     delayed.current = { x: cx, y: cy };
 
     document.body.style.cursor = 'none';
@@ -41,12 +41,12 @@ export default function CustomCursor({ children }) {
 
     const onMouseDown = () => {
       gsap.to(innerVeloRef.current, { scale: 0.7, duration: 0.15, overwrite: 'auto' });
-      gsap.to(dotRef.current,       { scale: 0,   duration: 0.15, overwrite: 'auto' });
+      gsap.to(dotRef.current, { scale: 0, duration: 0.15, overwrite: 'auto' });
     };
 
     const onMouseUp = () => {
       gsap.to(innerVeloRef.current, { scale: 1, duration: 0.3, ease: 'bounce.out', overwrite: 'auto' });
-      gsap.to(dotRef.current,       { scale: 1, duration: 0.3,                     overwrite: 'auto' });
+      gsap.to(dotRef.current, { scale: 1, duration: 0.3, overwrite: 'auto' });
     };
 
     const ticker = () => {
@@ -61,41 +61,41 @@ export default function CustomCursor({ children }) {
 
       // Skip velocity-stretch while a hover effect owns innerVeloRef transforms
       if (!isHovering.current) {
-        const dx   = mouse.current.x - delayed.current.x;
-        const dy   = mouse.current.y - delayed.current.y;
+        const dx = mouse.current.x - delayed.current.x;
+        const dy = mouse.current.y - delayed.current.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
 
         const stretch = Math.min(dist * 0.006, 0.5);
-        const angle   = Math.atan2(dy, dx) * (180 / Math.PI);
+        const angle = Math.atan2(dy, dx) * (180 / Math.PI);
 
         // gsap.set — no tween, ticker fires every frame anyway
         gsap.set(innerVeloRef.current, {
           rotation: angle,
-          scaleX:   1 + stretch,
-          scaleY:   1 - stretch * 0.4,
+          scaleX: 1 + stretch,
+          scaleY: 1 - stretch * 0.4,
         });
       }
     };
 
     gsap.ticker.add(ticker);
 
-    window.addEventListener('mousemove',  onMouseMove);
-    window.addEventListener('mousedown',  onMouseDown);
-    window.addEventListener('mouseup',    onMouseUp);
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mousedown', onMouseDown);
+    window.addEventListener('mouseup', onMouseUp);
 
     return () => {
       document.body.style.cursor = 'auto';
       gsap.ticker.remove(ticker);
-      window.removeEventListener('mousemove',  onMouseMove);
-      window.removeEventListener('mousedown',  onMouseDown);
-      window.removeEventListener('mouseup',    onMouseUp);
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('mousedown', onMouseDown);
+      window.removeEventListener('mouseup', onMouseUp);
     };
   }, []);
 
   // ─── EFFECT 2: Hover Interactions ─────────────────────────────────────────
   useEffect(() => {
     let activeMagnet = null;
-    let activeText   = null;
+    let activeText = null;
 
     // ── Helpers ──────────────────────────────────────────────────────────────
 
@@ -105,21 +105,21 @@ export default function CustomCursor({ children }) {
      */
     const restoreCursorRing = ({ delay = 0 } = {}) => {
       gsap.to(innerVeloRef.current, {
-        width:          '4rem',
-        height:         '4rem',
-        background:     '#ffffff',
-        border:         '0px solid transparent',
+        width: '4rem',
+        height: '4rem',
+        background: '#ffffff',
+        border: '0px solid transparent',
         backdropFilter: 'blur(0px)',  // fully clear — prevents blur persisting
-        scale:          1,
-        rotation:       0,
-        scaleX:         1,
-        scaleY:         1,
-        x:              0,
-        y:              0,
-        duration:       0.45,
-        ease:           'power3.out',
+        scale: 1,
+        rotation: 0,
+        scaleX: 1,
+        scaleY: 1,
+        x: 0,
+        y: 0,
+        duration: 0.45,
+        ease: 'power3.out',
         delay,
-        overwrite:      'auto',
+        overwrite: 'auto',
       });
     };
 
@@ -129,22 +129,22 @@ export default function CustomCursor({ children }) {
 
     // ── Magnifier enter ──────────────────────────────────────────────────────
     const enterMagnet = (btn) => {
-      activeMagnet       = btn;
+      activeMagnet = btn;
       isHovering.current = true;
 
       // Clear velocity-stretch axes before animating to avoid a transform jump
       gsap.set(innerVeloRef.current, { rotation: 0, scaleX: 1, scaleY: 1 });
 
       gsap.to(innerVeloRef.current, {
-        width:          90,
-        height:         90,
-        background:     'rgba(255,255,255,0.08)',
-        border:         '1px solid rgba(255,255,255,0.25)',
+        width: 90,
+        height: 90,
+        background: 'rgba(255,255,255,0.08)',
+        border: '1px solid rgba(255,255,255,0.25)',
         backdropFilter: 'blur(10px)',
-        scale:          1,
-        duration:       0.35,
-        ease:           'power3.out',
-        overwrite:      'auto',
+        scale: 1,
+        duration: 0.35,
+        ease: 'power3.out',
+        overwrite: 'auto',
       });
 
       gsap.to(dotRef.current, { scale: 0, duration: 0.2, overwrite: 'auto' });
@@ -155,9 +155,9 @@ export default function CustomCursor({ children }) {
        * avoids the ring drifting away from where the ticker thinks it is.
        */
       const onMagnetMove = (e) => {
-        const rect    = btn.getBoundingClientRect();
-        const centerX = rect.left + rect.width  / 2;
-        const centerY = rect.top  + rect.height / 2;
+        const rect = btn.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
 
         const distX = e.clientX - centerX;
         const distY = e.clientY - centerY;
@@ -167,20 +167,20 @@ export default function CustomCursor({ children }) {
 
         // Button drifts toward cursor
         gsap.to(btn, {
-          x:         btnPullX,
-          y:         btnPullY,
-          scale:     1.06,
-          duration:  0.35,
-          ease:      'power3.out',
+          x: btnPullX,
+          y: btnPullY,
+          scale: 1.06,
+          duration: 0.35,
+          ease: 'power3.out',
           overwrite: 'auto',
         });
 
         // Ring position follows button center + a gentle extra nudge
         gsap.to(outerRef.current, {
-          x:         centerX + btnPullX * 0.6,
-          y:         centerY + btnPullY * 0.6,
-          duration:  0.25,
-          ease:      'power2.out',
+          x: centerX + btnPullX * 0.6,
+          y: centerY + btnPullY * 0.6,
+          duration: 0.25,
+          ease: 'power2.out',
           overwrite: 'auto',
         });
       };
@@ -203,26 +203,26 @@ export default function CustomCursor({ children }) {
       restoreDot();
 
       gsap.to(btn, {
-        x:         0,
-        y:         0,
-        scale:     1,
-        duration:  0.6,
-        ease:      'elastic.out(1, 0.4)',
+        x: 0,
+        y: 0,
+        scale: 1,
+        duration: 0.6,
+        ease: 'elastic.out(1, 0.4)',
         overwrite: 'auto',
       });
     };
 
     // ── Text hover enter ─────────────────────────────────────────────────────
     const enterText = (el) => {
-      activeText         = el;
+      activeText = el;
       isHovering.current = true;
 
       gsap.set(innerVeloRef.current, { rotation: 0, scaleX: 1, scaleY: 1 });
 
       gsap.to(innerVeloRef.current, {
-        scale:     1.8,
-        duration:  0.3,
-        ease:      'back.out(1.5)',
+        scale: 1.8,
+        duration: 0.3,
+        ease: 'back.out(1.5)',
         overwrite: 'auto',
       });
 
@@ -244,10 +244,10 @@ export default function CustomCursor({ children }) {
     // ── Delegated listeners (single pair on document) ─────────────────────────
     const onMouseOver = (e) => {
       const metallic = e.target.closest('.btn-metallic');
-      const textEl   = e.target.closest('h1,h2');
+      const textEl = e.target.closest('h1,h2');
 
       if (metallic) {
-        if (activeText)                leaveText(metallic);
+        if (activeText) leaveText(metallic);
         if (activeMagnet !== metallic) {
           if (activeMagnet) leaveMagnet(activeMagnet);
           enterMagnet(metallic);
@@ -263,15 +263,15 @@ export default function CustomCursor({ children }) {
     const onMouseOut = (e) => {
       const next = e.relatedTarget;
       if (activeMagnet && !activeMagnet.contains(next)) leaveMagnet(activeMagnet);
-      if (activeText   && !activeText.contains(next))   leaveText(next);
+      if (activeText && !activeText.contains(next)) leaveText(next);
     };
 
     document.addEventListener('mouseover', onMouseOver);
-    document.addEventListener('mouseout',  onMouseOut);
+    document.addEventListener('mouseout', onMouseOut);
 
     return () => {
       document.removeEventListener('mouseover', onMouseOver);
-      document.removeEventListener('mouseout',  onMouseOut);
+      document.removeEventListener('mouseout', onMouseOut);
     };
   }, []);
 
