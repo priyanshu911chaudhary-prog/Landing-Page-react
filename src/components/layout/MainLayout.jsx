@@ -1,6 +1,4 @@
 import React from 'react';
-import Navbar from './Navbar';
-import Footer from './Footer';
 import AppBackground from '@/components/background/AppBackground';
 
 function MainLayout({ children }) {

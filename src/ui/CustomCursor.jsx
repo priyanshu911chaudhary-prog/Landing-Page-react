@@ -1,10 +1,16 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
+import { useReducedMotionPreference } from '@/hooks/useReducedMotion';
 
 export default function CustomCursor({ children }) {
+  const [isFinePointer, setIsFinePointer] = useState(true);
+  const prefersReducedMotion = useReducedMotionPreference();
+  const enabled = isFinePointer && !prefersReducedMotion;
+
   const outerRef = useRef(null);
   const innerVeloRef = useRef(null);
   const dotRef = useRef(null);
+  const labelRef = useRef(null);
 
   // Tracks whether the ticker should skip the default velocity-stretch
   const isHovering = useRef(false);
@@ -13,8 +19,33 @@ export default function CustomCursor({ children }) {
   const mouse = useRef({ x: 0, y: 0 });
   const delayed = useRef({ x: 0, y: 0 });
 
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const finePointerQuery = window.matchMedia('(pointer: fine)');
+
+    const syncPointer = () => {
+      setIsFinePointer(finePointerQuery.matches);
+    };
+
+    syncPointer();
+
+    if (finePointerQuery.addEventListener) {
+      finePointerQuery.addEventListener('change', syncPointer);
+      return () => {
+        finePointerQuery.removeEventListener('change', syncPointer);
+      };
+    }
+
+    finePointerQuery.addListener(syncPointer);
+    return () => {
+      finePointerQuery.removeListener(syncPointer);
+    };
+  }, []);
+
   // ─── EFFECT 1: Core Movement, Ticker & Velocity Stretch ───────────────────
   useEffect(() => {
+    if (!enabled) return;
     if (typeof window === 'undefined') return;
 
     const cx = window.innerWidth / 2;
@@ -90,37 +121,108 @@ export default function CustomCursor({ children }) {
       window.removeEventListener('mousedown', onMouseDown);
       window.removeEventListener('mouseup', onMouseUp);
     };
-  }, []);
+  }, [enabled]);
 
   // ─── EFFECT 2: Hover Interactions ─────────────────────────────────────────
   useEffect(() => {
+    if (!enabled) return;
+
     let activeMagnet = null;
     let activeText = null;
+    let activeModeEl = null;
 
     // ── Helpers ──────────────────────────────────────────────────────────────
+
+    const setLabel = (text = '') => {
+      if (!labelRef.current) return;
+      labelRef.current.textContent = text;
+      gsap.to(labelRef.current, {
+        autoAlpha: text ? 1 : 0,
+        y: text ? 0 : 4,
+        duration: 0.22,
+        ease: 'power2.out',
+        overwrite: 'auto',
+      });
+    };
+
+    const setModeVisual = (mode, label = '') => {
+      if (!innerVeloRef.current) return;
+
+      const presets = {
+        default: {
+          width: 64,
+          height: 64,
+          borderRadius: '9999px',
+          background: '#ffffff',
+          border: '0px solid transparent',
+          backdropFilter: 'blur(0px)',
+          scale: 1,
+        },
+        link: {
+          width: 52,
+          height: 52,
+          borderRadius: '9999px',
+          background: 'rgba(255,255,255,0.12)',
+          border: '1px solid rgba(255,255,255,0.4)',
+          backdropFilter: 'blur(6px)',
+          scale: 1,
+        },
+        inspect: {
+          width: 112,
+          height: 48,
+          borderRadius: '9999px',
+          background: 'rgba(255,255,255,0.08)',
+          border: '1px solid rgba(148,163,184,0.55)',
+          backdropFilter: 'blur(10px)',
+          scale: 1,
+        },
+        drag: {
+          width: 122,
+          height: 44,
+          borderRadius: '9999px',
+          background: 'rgba(148,163,184,0.18)',
+          border: '1px dashed rgba(226,232,240,0.65)',
+          backdropFilter: 'blur(8px)',
+          scale: 1,
+        },
+        cta: {
+          width: 90,
+          height: 90,
+          borderRadius: '9999px',
+          background: 'rgba(255,255,255,0.08)',
+          border: '1px solid rgba(255,255,255,0.25)',
+          backdropFilter: 'blur(10px)',
+          scale: 1,
+        },
+      };
+
+      gsap.to(innerVeloRef.current, {
+        ...presets[mode],
+        rotation: 0,
+        scaleX: 1,
+        scaleY: 1,
+        x: 0,
+        y: 0,
+        duration: 0.3,
+        ease: 'power3.out',
+        overwrite: 'auto',
+      });
+
+      setLabel(label);
+    };
 
     /**
      * Restore innerVeloRef to its resting state.
      * Explicitly reset every axis that hover effects may have touched so nothing lingers.
      */
     const restoreCursorRing = ({ delay = 0 } = {}) => {
-      gsap.to(innerVeloRef.current, {
-        width: '4rem',
-        height: '4rem',
-        background: '#ffffff',
-        border: '0px solid transparent',
-        backdropFilter: 'blur(0px)',  // fully clear — prevents blur persisting
-        scale: 1,
-        rotation: 0,
-        scaleX: 1,
-        scaleY: 1,
-        x: 0,
-        y: 0,
-        duration: 0.45,
-        ease: 'power3.out',
-        delay,
-        overwrite: 'auto',
-      });
+      if (delay > 0) {
+        gsap.delayedCall(delay, () => {
+          setModeVisual('default');
+        });
+        return;
+      }
+      setModeVisual('default');
     };
 
     const restoreDot = ({ delay = 0 } = {}) => {
@@ -135,17 +237,7 @@ export default function CustomCursor({ children }) {
       // Clear velocity-stretch axes before animating to avoid a transform jump
       gsap.set(innerVeloRef.current, { rotation: 0, scaleX: 1, scaleY: 1 });
 
-      gsap.to(innerVeloRef.current, {
-        width: 90,
-        height: 90,
-        background: 'rgba(255,255,255,0.08)',
-        border: '1px solid rgba(255,255,255,0.25)',
-        backdropFilter: 'blur(10px)',
-        scale: 1,
-        duration: 0.35,
-        ease: 'power3.out',
-        overwrite: 'auto',
-      });
+      setModeVisual('cta', btn.dataset.cursorLabel || 'GO');
 
       gsap.to(dotRef.current, { scale: 0, duration: 0.2, overwrite: 'auto' });
 
@@ -226,6 +318,8 @@ export default function CustomCursor({ children }) {
         overwrite: 'auto',
       });
 
+      setLabel('READ');
+
       gsap.to(dotRef.current, { scale: 0, duration: 0.2, overwrite: 'auto' });
     };
 
@@ -241,18 +335,47 @@ export default function CustomCursor({ children }) {
       restoreDot();
     };
 
+    const enterMode = (el) => {
+      activeModeEl = el;
+      isHovering.current = true;
+
+      const mode = el.dataset.cursor || (el.closest('a,button,[role="button"]') ? 'link' : 'default');
+      const fallbackLabel = mode === 'link' ? 'OPEN' : mode === 'inspect' ? 'SCAN' : mode === 'drag' ? 'DRAG' : '';
+
+      setModeVisual(mode, el.dataset.cursorLabel || fallbackLabel);
+      gsap.to(dotRef.current, { scale: 0, duration: 0.2, overwrite: 'auto' });
+    };
+
+    const leaveMode = (nextTarget, force = false) => {
+      if (!force && nextTarget?.closest?.('[data-cursor],a,button,[role="button"],.btn-metallic')) return;
+
+      activeModeEl = null;
+      isHovering.current = false;
+      restoreCursorRing();
+      restoreDot();
+    };
+
     // ── Delegated listeners (single pair on document) ─────────────────────────
     const onMouseOver = (e) => {
       const metallic = e.target.closest('.btn-metallic');
+      const modeEl = e.target.closest('[data-cursor],a,button,[role="button"]');
       const textEl = e.target.closest('h1,h2');
 
       if (metallic) {
         if (activeText) leaveText(metallic);
+        if (activeModeEl) leaveMode(metallic, true);
         if (activeMagnet !== metallic) {
           if (activeMagnet) leaveMagnet(activeMagnet);
           enterMagnet(metallic);
         }
+      } else if (modeEl) {
+        if (activeText) leaveText(modeEl);
+        if (activeMagnet) leaveMagnet(activeMagnet);
+        if (activeModeEl !== modeEl) {
+          enterMode(modeEl);
+        }
       } else if (textEl && !textEl.closest('a')) {
+        if (activeModeEl) leaveMode(textEl);
         if (activeText !== textEl) {
           if (activeText) leaveText(textEl);
           enterText(textEl);
@@ -263,6 +386,7 @@ export default function CustomCursor({ children }) {
     const onMouseOut = (e) => {
       const next = e.relatedTarget;
       if (activeMagnet && !activeMagnet.contains(next)) leaveMagnet(activeMagnet);
+      if (activeModeEl && !activeModeEl.contains(next)) leaveMode(next);
       if (activeText && !activeText.contains(next)) leaveText(next);
     };
 
@@ -273,7 +397,9 @@ export default function CustomCursor({ children }) {
       document.removeEventListener('mouseover', onMouseOver);
       document.removeEventListener('mouseout', onMouseOut);
     };
-  }, []);
+  }, [enabled]);
+
+  if (!enabled) return <>{children}</>;
 
   return (
     <>
@@ -285,7 +411,11 @@ export default function CustomCursor({ children }) {
         {/* Inner ring — controls visual shape, size, and blend effects */}
         <div
           ref={innerVeloRef}
-          className="w-16 h-16 bg-white rounded-full -translate-x-1/2 -translate-y-1/2 will-change-transform"
+          className="w-16 h-16 bg-white rounded-full -translate-x-1/2 -translate-y-1/2 will-change-transform flex items-center justify-center"
+        />
+        <span
+          ref={labelRef}
+          className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-[9px] font-mono tracking-[0.14em] text-white/90 uppercase opacity-0"
         />
       </div>
 

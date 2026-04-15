@@ -172,7 +172,7 @@ function ExampleResultSection() {
                   </div>
                   <div className="space-y-2">
                     {EVIDENCE_SOURCES.map((src) => (
-                      <div key={src.domain} className="group relative flex items-center justify-between rounded-xl border border-slate-700/40 bg-slate-900/30 px-4 py-3 hover:border-slate-600/60 hover:bg-slate-900/50 transition-all duration-200 cursor-default">
+                      <div key={src.domain} data-cursor="inspect" data-cursor-label="SOURCE" className="group relative flex items-center justify-between rounded-xl border border-slate-700/40 bg-slate-900/30 px-4 py-3 hover:border-slate-600/60 hover:bg-slate-900/50 transition-all duration-200 cursor-default">
                         <span aria-hidden="true" className="absolute left-0 top-1/2 -translate-y-1/2 h-0 w-[2px] rounded-r bg-cyan-400/70 group-hover:h-6 transition-all duration-200" />
                         <div className="flex items-center gap-3 min-w-0">
                           <span className={`shrink-0 text-[9px] font-mono px-1.5 py-0.5 rounded border ${src.typeBorder} bg-slate-900/60 ${src.typeColor}`}>

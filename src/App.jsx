@@ -1,31 +1,65 @@
-import { useState, lazy, Suspense } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import Lenis from 'lenis';
 
+import { ScrollTrigger } from '@/animations/gsap';
 import MainLayout from '@/components/layout/MainLayout';
+import { useReducedMotionPreference } from '@/hooks/useReducedMotion';
 import CustomCursor from '@/ui/CustomCursor';
 import Preloader from '@/ui/Preloader';
 
-const Home = lazy(() => import('@/pages/Home'));
-const Detector = lazy(() => import('@/pages/Detector'));
+import Home from '@/pages/Home';
 
 function App() {
   const [preloaderDone, setPreloaderDone] = useState(false);
+  const prefersReducedMotion = useReducedMotionPreference();
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return undefined;
+    if (prefersReducedMotion) return undefined;
+
+    const lenis = new Lenis({
+      duration: 1.1,
+      smoothWheel: true,
+      syncTouch: true,
+      touchMultiplier: 1.1,
+      wheelMultiplier: 1,
+      easing: (t) => 1 - Math.pow(1 - t, 3),
+    });
+
+    const syncTrigger = () => {
+      ScrollTrigger.update();
+    };
+
+    lenis.on('scroll', syncTrigger);
+
+    let rafId = null;
+    const raf = (time) => {
+      lenis.raf(time);
+      rafId = requestAnimationFrame(raf);
+    };
+    rafId = requestAnimationFrame(raf);
+
+    const refreshId = requestAnimationFrame(() => {
+      ScrollTrigger.refresh();
+    });
+
+    return () => {
+      cancelAnimationFrame(refreshId);
+      if (rafId !== null) cancelAnimationFrame(rafId);
+      lenis.off('scroll', syncTrigger);
+      lenis.destroy();
+      ScrollTrigger.refresh();
+    };
+  }, [prefersReducedMotion]);
 
   return (
     <>
       {!preloaderDone && <Preloader onDone={() => setPreloaderDone(true)} />}
-      <BrowserRouter>
-        <CustomCursor>
-          <MainLayout>
-            <Suspense fallback={null}>
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/detector" element={<Detector />} />
-              </Routes>
-            </Suspense>
-          </MainLayout>
-        </CustomCursor>
-      </BrowserRouter>
+      <CustomCursor>
+        <MainLayout>
+          <Home />
+        </MainLayout>
+      </CustomCursor>
     </>
   );
 }

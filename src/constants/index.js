@@ -7,5 +7,3 @@ export { THREATS } from './threats';
 export { PHASES, PHASE_PROGRESS, PHASE_TAGS } from './phases';
 export { EVIDENCE_SOURCES } from './evidence';
 export { PIPELINE_STAGES } from './pipeline';
-export { FEATURES } from './features';
-export { STATS } from './stats';

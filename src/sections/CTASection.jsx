@@ -1,5 +1,4 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import Section from '@/ui/Section';
 
 function CTASection() {
@@ -60,8 +59,10 @@ function CTASection() {
 
         {/* ── Single CTA button ── */}
         <div data-reveal>
-          <Link
-            to="/detector"
+          <a
+            href="#hero-section"
+            data-cursor="cta"
+            data-cursor-label="TRY"
             className="btn-metallic group inline-flex items-center gap-3 rounded-full px-10 py-5 font-heading font-semibold text-white text-lg tracking-wide"
           >
             Try Detector
@@ -73,7 +74,7 @@ function CTASection() {
             >
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
             </svg>
-          </Link>
+          </a>
         </div>
 
       </div>

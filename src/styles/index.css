@@ -3,7 +3,29 @@
 html {
     scroll-behavior: smooth;
     scroll-padding-top: 4rem;
-    /* Accounts for fixed navbar */
+    overflow-x: hidden;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+}
+
+html::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+}
+
+body {
+    overflow-x: hidden;
+    background-color: #020617;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+body::-webkit-scrollbar,
+#root::-webkit-scrollbar {
+    display: none;
+}
+
+#root {
+    overflow-x: hidden;
 }
 
 @theme {

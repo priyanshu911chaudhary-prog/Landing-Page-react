@@ -42,7 +42,7 @@ function HowItWorksSection() {
 
           <div className="flex flex-col gap-3">
             {PHASES.map((p, i) => (
-              <div key={p.phase} data-reveal className="flex flex-col">
+              <div key={p.phase} data-motion="section-card" className="flex flex-col">
                 <div className={`group relative overflow-hidden rounded-2xl border border-slate-700/40 border-t-2 ${p.borderAccent} bg-slate-950/40 backdrop-blur-sm transition-all duration-300 cursor-default ${p.hoverBorder} ${p.hoverGlow} hover:bg-slate-900/50`}>
                   <div
                     aria-hidden="true"
