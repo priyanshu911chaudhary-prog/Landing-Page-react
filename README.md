@@ -1,40 +1,52 @@
-# Verify-X (DTI-3.0)
 
-**The DNA of Digital Trust.**
+# Landing Page – AI Trust Scanner
 
-Verify-X is an enterprise-grade AI fake news detection platform designed for journalists, researchers, and conscious consumers. It provides real-time credibility analysis of digital claims through a sophisticated neural engine.
+A modern, animated landing page built with React, Vite, and GSAP. Designed to showcase an AI-powered digital trust and verification product, this project features smooth scroll, custom UI components, and a cinematic user experience.
 
-## 🚀 Key Features
+## ✨ Features
 
-- **Neural Engine Analysis**: Sophisticated claim parsing and relationship matching.
-- **Evidence Correlation**: Real-time cross-referencing with multiple verified data sources.
-- **Confidence Scoring**: Transparent verification results with detailed reasoning.
-- **Cinematic UI**: A high-performance, futuristic interface built with GSAP and Tailwind CSS.
+- Responsive, single-page React app
+- Futuristic UI with GSAP-powered animations
+- Custom cursor and animated preloader
+- Modular, maintainable component structure
+- Tailwind CSS for rapid, modern styling
+- Clean, production-ready build setup
 
 ## 🛠 Tech Stack
 
-- **Frontend**: React.js with Vite
-- **Styling**: Tailwind CSS (Metallic Design Tokens)
-- **Animations**: GSAP (GreenSock Animation Platform)
-- **Deployment**: Configured for modern web hosting
+- **React** (with hooks and functional components)
+- **Vite** (fast dev/build tool)
+- **GSAP** (GreenSock Animation Platform)
+- **Tailwind CSS** (utility-first styling)
+- **Three.js** (for 3D background effects)
+- **Zustand** (state management for interactive elements)
 
-## ⌨️ Getting Started
+## 🚀 Getting Started
 
-1. **Install Dependencies**:
+1. **Install dependencies:**
    ```bash
    npm install
    ```
 
-2. **Launch Dev Server**:
+2. **Run the development server:**
    ```bash
    npm run dev
    ```
 
-3. **Build for Production**:
+3. **Build for production:**
    ```bash
    npm run build
    ```
 
-## ⚖️ License
+## 📁 Project Structure
+
+- `src/components/` – Layout, background, and UI components
+- `src/sections/` – Page sections (Hero, Pipeline, CTA, etc.)
+- `src/constants/` – Static data for sections and UI
+- `src/hooks/` – Custom React hooks for animation and state
+- `src/styles/` – Global CSS (Tailwind)
+- `public/` – Static assets
+
+## 📝 License
 
 All rights reserved. Digital Trust Initiative 2026.
