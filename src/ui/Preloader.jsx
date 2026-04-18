@@ -8,9 +8,19 @@ import { useState, useEffect, useRef } from 'react';
 ───────────────────────────────────────────── */
 export default function Preloader({ onDone }) {
     const [count, setCount] = useState(0);
-    const [phase, setPhase] = useState('idle'); // idle → counting → fadeOut → done
+    const [phase, setPhase] = useState('counting'); // counting → fadeOut → done
+    const [actualProgress, setActualProgress] = useState(0);
+    const [isReady, setIsReady] = useState(false);
     const canvasRef = useRef(null);
-    const rafRef = useRef(null);
+    const noiseRafRef = useRef(null);
+    const progressRafRef = useRef(null);
+
+    const loadImage = (url) => new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => resolve();
+        img.onerror = () => resolve();
+        img.src = url;
+    });
 
     /* ── Noise texture canvas ── */
     useEffect(() => {
@@ -29,7 +39,7 @@ export default function Preloader({ onDone }) {
                 imageData.data[i + 3] = 40; // subtle opacity
             }
             ctx.putImageData(imageData, 0, 0);
-            rafRef.current = requestAnimationFrame(render);
+            noiseRafRef.current = requestAnimationFrame(render);
         };
 
         const resize = () => {
@@ -42,44 +52,101 @@ export default function Preloader({ onDone }) {
 
         return () => {
             window.removeEventListener('resize', resize);
-            cancelAnimationFrame(rafRef.current);
+            if (noiseRafRef.current != null) {
+                cancelAnimationFrame(noiseRafRef.current);
+            }
         };
     }, []);
 
-    /* ── Counter animation ── */
+    /* ── Real load progress tracking ── */
     useEffect(() => {
-        // Start after a very short delay so the layout renders first
-        const startDelay = setTimeout(() => {
-            setPhase('counting');
+        let cancelled = false;
 
-            const totalDuration = 2800; // ms
-            const startTime = performance.now();
+        const waitForWindowLoad = new Promise((resolve) => {
+            if (document.readyState === 'complete') {
+                resolve();
+                return;
+            }
 
-            const tick = (now) => {
-                const elapsed = now - startTime;
-                const progress = Math.min(elapsed / totalDuration, 1);
-                // Ease-out curve: fast early, slow near 100
-                const eased = 1 - Math.pow(1 - progress, 2.2);
-                const value = Math.floor(eased * 100);
-                setCount(value);
+            const handleLoad = () => resolve();
+            window.addEventListener('load', handleLoad, { once: true });
+        });
 
-                if (progress < 1) {
-                    rafRef.current = requestAnimationFrame(tick);
-                } else {
-                    setCount(100);
-                    // Hold for a beat then fade out
-                    setTimeout(() => setPhase('fadeOut'), 300);
-                }
-            };
+        const waitForFonts = document.fonts?.ready
+            ? document.fonts.ready.then(() => undefined).catch(() => undefined)
+            : Promise.resolve();
 
-            rafRef.current = requestAnimationFrame(tick);
-        }, 200);
+        const waitForCriticalAsset = loadImage('/icon.svg');
+        const waitForScannerChunk = import('@/components/background/AITrustScanner')
+            .then(() => undefined)
+            .catch(() => undefined);
+
+        const tasks = [
+            waitForWindowLoad,
+            waitForFonts,
+            waitForCriticalAsset,
+            waitForScannerChunk,
+        ];
+
+        let done = 0;
+        const total = tasks.length;
+
+        const markDone = () => {
+            done += 1;
+            const percent = Math.round((done / total) * 100);
+            if (!cancelled) setActualProgress(percent);
+        };
+
+        tasks.forEach((task) => {
+            task.finally(markDone);
+        });
+
+        Promise.allSettled(tasks).then(() => {
+            if (!cancelled) {
+                setIsReady(true);
+            }
+        });
 
         return () => {
-            clearTimeout(startDelay);
-            cancelAnimationFrame(rafRef.current);
+            cancelled = true;
         };
     }, []);
+
+    /* ── Smooth displayed progress (real target, no fake completion) ── */
+    useEffect(() => {
+        let display = 0;
+
+        const tick = () => {
+            const target = isReady ? 100 : Math.min(actualProgress, 99);
+            display += (target - display) * 0.12;
+
+            if (target - display < 0.15) {
+                display = target;
+            }
+
+            setCount(Math.max(0, Math.min(100, Math.floor(display))));
+
+            if (display < 100 || !isReady) {
+                progressRafRef.current = requestAnimationFrame(tick);
+            }
+        };
+
+        progressRafRef.current = requestAnimationFrame(tick);
+
+        return () => {
+            if (progressRafRef.current != null) {
+                cancelAnimationFrame(progressRafRef.current);
+            }
+        };
+    }, [actualProgress, isReady]);
+
+    /* ── Exit once real loading is done and displayed count reaches 100 ── */
+    useEffect(() => {
+        if (!isReady || count < 100 || phase !== 'counting') return undefined;
+
+        const startFade = setTimeout(() => setPhase('fadeOut'), 180);
+        return () => clearTimeout(startFade);
+    }, [isReady, count, phase]);
 
     /* ── After fade-out completes, tell parent ── */
     useEffect(() => {
@@ -90,6 +157,7 @@ export default function Preloader({ onDone }) {
             }, 900); // matches CSS transition duration
             return () => clearTimeout(t);
         }
+        return undefined;
     }, [phase, onDone]);
 
     if (phase === 'done') return null;

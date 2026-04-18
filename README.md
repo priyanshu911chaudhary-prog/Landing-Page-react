@@ -1,52 +1,125 @@
 
-# Landing Page – AI Trust Scanner
+# Verify-X Landing Page
 
-A modern, animated landing page built with React, Vite, and GSAP. Designed to showcase an AI-powered digital trust and verification product, this project features smooth scroll, custom UI components, and a cinematic user experience.
+Animation-heavy product landing page built with React, Vite, GSAP, Lenis, and Three.js.
 
-## ✨ Features
+This project is optimized for smooth scroll storytelling, 3D ambient motion, and production deployment.
 
-- Responsive, single-page React app
-- Futuristic UI with GSAP-powered animations
-- Custom cursor and animated preloader
-- Modular, maintainable component structure
-- Tailwind CSS for rapid, modern styling
-- Clean, production-ready build setup
+## Overview
 
-## 🛠 Tech Stack
+- Stack: React 19 + Vite 5 + Tailwind 4
+- Animation: GSAP + ScrollTrigger + Lenis + custom cursor + CSS keyframes
+- 3D: React Three Fiber + Drei + Postprocessing Bloom
+- State: lightweight shared object animation state in [src/store/dnaState.js](src/store/dnaState.js)
 
-- **React** (with hooks and functional components)
-- **Vite** (fast dev/build tool)
-- **GSAP** (GreenSock Animation Platform)
-- **Tailwind CSS** (utility-first styling)
-- **Three.js** (for 3D background effects)
-- **Zustand** (state management for interactive elements)
+## Key Features
 
-## 🚀 Getting Started
+- Cinematic hero intro timeline with split-character motion and scramble effect
+- Section-by-section scroll choreography using ScrollTrigger
+- Real-time 3D DNA scene with mouse influence and scroll-driven state transitions
+- Context-aware custom cursor with magnetic CTA behavior
+- Realistic preloader flow that reflects actual readiness tasks (not fake time-only progress)
+- Reduced-motion support via [src/hooks/useReducedMotion.js](src/hooks/useReducedMotion.js)
 
-1. **Install dependencies:**
-   ```bash
-   npm install
-   ```
+## Project Structure
 
-2. **Run the development server:**
-   ```bash
-   npm run dev
-   ```
+- App shell: [src/App.jsx](src/App.jsx), [src/main.jsx](src/main.jsx)
+- Main page composition: [src/pages/Home.jsx](src/pages/Home.jsx)
+- Sections: [src/sections](src/sections)
+- Background systems: [src/components/background](src/components/background)
+- Animation orchestration: [src/hooks/useHomeScrollAnimations.js](src/hooks/useHomeScrollAnimations.js)
+- Global styles: [src/styles/index.css](src/styles/index.css)
+- Loader: [src/ui/Preloader.jsx](src/ui/Preloader.jsx)
 
-3. **Build for production:**
-   ```bash
-   npm run build
-   ```
+## Local Development
 
-## 📁 Project Structure
+### Requirements
 
-- `src/components/` – Layout, background, and UI components
-- `src/sections/` – Page sections (Hero, Pipeline, CTA, etc.)
-- `src/constants/` – Static data for sections and UI
-- `src/hooks/` – Custom React hooks for animation and state
-- `src/styles/` – Global CSS (Tailwind)
-- `public/` – Static assets
+- Node.js 18+ (recommended: latest LTS)
+- npm 9+
 
-## 📝 License
+### Install
+
+```bash
+npm install
+```
+
+### Start dev server
+
+```bash
+npm run dev
+```
+
+### Lint
+
+```bash
+npm run lint
+```
+
+### Production build
+
+```bash
+npm run build
+```
+
+### Preview production build locally
+
+```bash
+npm run preview
+```
+
+## Deployment
+
+This is a static Vite build. Deploy the generated [dist](dist) directory.
+
+### Vercel
+
+- Framework preset: Vite
+- Build command: npm run build
+- Output directory: dist
+
+### Netlify
+
+- Build command: npm run build
+- Publish directory: dist
+
+### Generic static hosting
+
+1. Run npm run build
+2. Upload dist contents to your web root/CDN bucket
+
+## Deployment Checklist
+
+- Lint passes: npm run lint
+- Build passes: npm run build
+- No local-only docs committed (for example [animation-notes.md](animation-notes.md) is gitignored)
+- Verify hashed assets and lazy chunks are loading correctly in preview
+- Confirm reduced-motion behavior and mobile rendering
+
+
+## Troubleshooting
+
+- If npm run dev fails immediately:
+  - Ensure dependencies are installed with npm install
+  - Confirm Node version is 18+
+  - Re-run with clean install if needed:
+
+```bash
+rm -rf node_modules package-lock.json
+npm install
+```
+
+- If scroll animations feel unsynced:
+  - Check Lenis initialization in [src/App.jsx](src/App.jsx)
+  - Ensure ScrollTrigger update/refresh hooks are active
+
+## Scripts
+
+- npm run dev: start development server
+- npm run build: create production bundle in dist
+- npm run preview: preview built app
+- npm run lint: run ESLint
+
+## License
 
 All rights reserved. Digital Trust Initiative 2026.
